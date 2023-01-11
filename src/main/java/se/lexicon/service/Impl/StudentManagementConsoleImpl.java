@@ -15,7 +15,6 @@ import java.util.Optional;
 
 @Component
 public class StudentManagementConsoleImpl implements StudentManagement {
-    private List<Student> storage = new ArrayList<>();
     UserInputService scannerService;
     StudentDao studentDao;
 
@@ -26,48 +25,47 @@ public class StudentManagementConsoleImpl implements StudentManagement {
     }
 
     @Override
-    public Student create(Student student) {
-        if (student == null) throw new IllegalArgumentException("student was null");
-        student.setId(StudentIdSequencer.nextId());
-        storage.add(student);
-        return student;
+    public Student create() {
+        System.out.println("Enter student full name");
+        String username = scannerService.getString();
+        return new Student(username);
     }
 
     @Override
     public Student save(Student student) {
-        student.setId(StudentIdSequencer.nextId());
-        storage.add(student);
-        return student;
+        if (student == null) throw new IllegalArgumentException("student was null");
+        return studentDao.save(student);
     }
 
     @Override
-    public Optional<Student> findById(int studentId) {
-        if (studentId == 0) throw new IllegalArgumentException("id was null");
-        return storage.stream().filter(student -> student.getId() == studentId).findFirst();
+    public Student findById(int studentId) {
+        if (studentId == 0) throw new IllegalArgumentException("id was not valid");
+        try {
+            return studentDao.findById(studentId);
+        } catch (DataNotFoundException e) {
+            System.out.println(e.getMessage());
+        }
+        return null;
     }
 
     @Override
     public Student remove(int id) throws DataNotFoundException {
-        Optional<Student> optionalStudent = findById(id);
-        if (!optionalStudent.isPresent()) throw new DataNotFoundException("data not found exception");
-        else storage.remove(optionalStudent.get());
+        if(id <= 0 ) throw new IllegalArgumentException("Id was not valid");
+        studentDao.delete(id);
         return null;
     }
 
     @Override
     public List<Student> findAll() {
-        return new ArrayList<>(storage);
+        return studentDao.findAll();
     }
 
     @Override
-    public void edit(Student student) {
+    public Student edit(Student student) {
         if (student == null) throw new IllegalArgumentException("to edit data was null");
-        for (Student original : storage) {
-            if (original.getId() == student.getId()) {
-                original.setId(student.getId());
-                original.setName(student.getName());
-            }
-        }
+        if(student.getId() == 0) throw new IllegalArgumentException("student id should not be empty or zero");
+          studentDao.save(student);
+          return student;
 
     }
 

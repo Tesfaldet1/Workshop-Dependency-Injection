@@ -1,30 +1,40 @@
 package se.lexicon.data_access.implement;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import se.lexicon.Exception.DataNotFoundException;
 import se.lexicon.data_access.StudentDao;
 import se.lexicon.data_access.implement.Sequencer.StudentIdSequencer;
 import se.lexicon.models.Student;
+import se.lexicon.util.UserInputService;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Component
 public class StudentDaoListImpl implements StudentDao {
     private List<Student> storage = new ArrayList<>();
+    @Autowired
+    UserInputService scannerService;
     @Override
     public Student save(Student student) {
         if(student== null) throw new IllegalArgumentException("student was null");
-        student.setId(StudentIdSequencer.nextId());
-        storage.add(student);
+        if(student.getId()==0) {
+            student.setId(StudentIdSequencer.nextId());
+            storage.add(student);
+        }else{
+            System.out.println("Enter the name you want to update");
+            String studentInput = scannerService.getString();
+            student.setName(studentInput);
+        }
         return student;
     }
 
     @Override
-    public Optional <Student> findById(int id) {
+    public Student findById(int id) throws DataNotFoundException{
         if(id == 0) throw  new IllegalArgumentException("id was null");
-        return storage.stream().filter(student -> student.getId()==id).findFirst();
+        return storage.stream().filter(student -> student.getId()==id).findFirst()
+                .orElseThrow(()->new DataNotFoundException("student not found"));
     }
 
     @Override
@@ -34,9 +44,8 @@ public class StudentDaoListImpl implements StudentDao {
 
     @Override
     public void delete(int studentId) throws DataNotFoundException {
-        Optional <Student> optionalStudent = findById(studentId);
-        if(!optionalStudent.isPresent()) throw new DataNotFoundException("data not found exception");
-        else storage.remove(optionalStudent.get());
+        Student removeStudent = findById(studentId);
+        storage.remove(removeStudent);
 
 
     }

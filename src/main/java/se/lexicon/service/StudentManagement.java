@@ -7,12 +7,12 @@ import java.util.List;
 import java.util.Optional;
 
 public interface StudentManagement {
-    Student create(Student student);
+    Student create();
     Student save (Student student);
-    Optional<Student> findById(int studentId);
+    Student findById(int studentId);
 
     Student remove(int id) throws DataNotFoundException;
     List<Student> findAll();
-    void edit(Student student) throws DataNotFoundException;
+    Student edit(Student student) throws DataNotFoundException;
 
 }

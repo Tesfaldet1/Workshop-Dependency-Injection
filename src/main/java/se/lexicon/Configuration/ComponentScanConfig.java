@@ -6,11 +6,14 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.Scanner;
 
-//@Configuration
+@Configuration
 @ComponentScan(basePackages = "se.lexicon")
 public class ComponentScanConfig {
     @Bean
     public Scanner scanner(){
         return new Scanner(System.in);
     }
+
+
+
 }
